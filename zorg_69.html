@@ -27,7 +27,24 @@
             console.log(button)
             button.onclick = function(){
                 console.log("кнопка нажата")
+                let img = document.querySelector('img')
+                img.style.rotate = '90deg'
+                console.log(img)
+                if(img.style.display == 'none'){
+                    img.style.display = 'initial'
+                } else{
+                    img.style.display = 'none'
+                }
             }
+            let rotation = 0;
+            setInterval(function(){
+                rotation += 10
+                if (rotation >= 360){
+                    rotation = 0
+                }
+                let cssRule =`${rotation}deg`
+                document.querySelector('img').style.rotate = cssRule
+            },5)
         </script>
     </body>
 </html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+        button{
+            background-color: rgb(255, 0, 0);
+            padding: 2em 5em;
+            border-radius: 111px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+    </style>
+    <style>
+        .eat {
+            position: absolute;
+            bottom: 10%;
+            right: 10%;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: blue;
+            color: white;
+            font-size: 1.5em;
+        }
+    </style>
+    <script src="https://pixijs.download/release/pixi.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
+</head>
+  <body>
+    <button class="start">Стартуем</button>
+    <button class="eat">КУСЬ</button>
+    <script>
+        let socket = io("ws://213.171.9.221:1111", {
+            transports: [
+                "websocket"
+            ],
+            reconnectionDelayMax: 10000,
+        })
+        socket.on('connect', () => {
+            console.log('connected')
+        })
+        socket.on('message', message => {
+            console.log(message)
+        })
+        socket.on('death', event => {
+            alert('вы умерли!')
+        })
+        socket.on('player:online', players => {
+            // console.log(players)
+            if (app.stage.children[0]) {
+                while(app.stage.children[0]) {
+                    app.stage.removeChild(app.stage.children[0]);
+                }
+            }
+            players.map(player => {
+                // let sprite = PIXI.Sprite.from('https://cdn-icons-png.flaticon.com/512/6166/6166814.png');
+                // sprite.scale.set(0.3, 0.3);
+                // sprite.x = player.x;
+                // sprite.y = player.y;
+                const graphics = new PIXI.Graphics();
+                graphics.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+                graphics.beginFill(0xDE3249, 1);
+                graphics.drawCircle(player.x, player.y, 5 + player.mass);
+                graphics.endFill();
+
+                // app.stage.addChild(sprite);
+                app.stage.addChild(graphics);
+            })
+        })
+
+
+        let app = new PIXI.Application({ width: 1420, height: 720 });
+        document.body.appendChild(app.view);
+        document.querySelector('.eat').onclick = function () {
+            socket.emit('player:eat')
+        }
+        app.renderer.view.onmousedown = function (e) {
+            console.log(e)
+            socket.emit('player:navigate', {
+                x: e.x,
+                y: e.y
+            })
+        }
+        function lerp(a, b, t) {
+            var len = a.length;
+            if(b.length != len) return;
+
+            var x = [];
+            for(var i = 0; i < len; i++)
+                x.push(a[i] + t * (b[i] - a[i]));
+            return x;
+        }
+    </script>
+
+            <canvas></canvas>
+            <script>
+                let canvas = document.querySelector('canvas')
+                console.log(canvas)
+                canvas.style.display = 'none'
+
+                let button = document.querySelector('.start')
+                console.log(button)
+                button.onclick = function () {
+                    canvas.style.display = 'initial'
+                    console.log("кнопка нажана")
+                }
+            </script>
+  </body>
+</html>

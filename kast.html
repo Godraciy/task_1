@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://pixijs.download/release/pixi.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
+</head>
+  <body>
+    <script>
+        let socket = io("ws://213.171.9.221:1111", {
+            transports: [
+                "websocket"
+            ],
+            reconnectionDelayMax: 10000,
+        })
+        socket.on('connect', () => {
+            console.log('connected')
+        })
+        socket.on('message', message => {
+            console.log(message)
+        })
+
+        socket.on('player:online', players => {
+            console.log(players)
+            if (app.stage.children[0]) {
+                while(app.stage.children[0]) {
+                    app.stage.removeChild(app.stage.children[0]);
+                }
+            }
+            players.map(player => {
+                let sprite = PIXI.Sprite.from('https://cdn-icons-png.flaticon.com/512/6166/6166814.png');
+                sprite.scale.set(0.3, 0.3);
+                sprite.x = player.x;
+                sprite.y = player.y;
+                app.stage.addChild(sprite);
+            })
+        })
+
+
+      let app = new PIXI.Application({ width: 1420, height: 720 });
+      document.body.appendChild(app.view);
+
+      app.renderer.view.onmousedown = function (e) {
+            console.log(e)
+            socket.emit('player:navigate', {
+                x: e.x,
+                y: e.y
+            })
+        }
+    </script>
+  </body>
+</html>
